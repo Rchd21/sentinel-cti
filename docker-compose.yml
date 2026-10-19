@@ -1,0 +1,20 @@
+# Phase 1 : base PostgreSQL + pgvector (les embeddings serviront au RAG en Phase 5).
+# Les services ollama, api et dashboard seront ajoutés au fil des phases.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel  # valeur locale de dev uniquement
+      POSTGRES_DB: sentinel
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinel-cti"
+version = "0.1.0"
+description = "Plateforme de Threat Intelligence augmentée par l'IA (collecte OSINT, IoC, ATT&CK, RAG)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Rachid Ait Ameur" }]
+dependencies = [
+    "requests>=2.31",
+    "feedparser>=6.0",
+    "sqlalchemy>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+sentinel = "sentinel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: appelle une vraie source sur Internet (désactivé par défaut)"]
+addopts = "-m 'not live'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

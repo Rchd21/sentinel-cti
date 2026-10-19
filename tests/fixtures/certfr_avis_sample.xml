@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Flux d'exemple au format RSS 2.0 pour les tests hors ligne. Contenu fictif. -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CERT-FR - Avis de sécurité</title>
+    <link>https://cert.cyber.gouv.fr/avis/</link>
+    <description>Avis de sécurité du CERT-FR</description>
+    <language>fr</language>
+    <item>
+      <title>Multiples vulnérabilités dans les produits Fortinet (12 octobre 2026)</title>
+      <link>https://cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1301/</link>
+      <guid isPermaLink="true">https://cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1301/</guid>
+      <pubDate>Mon, 12 Oct 2026 14:05:00 +0200</pubDate>
+      <description><![CDATA[<p>De multiples vulnérabilités ont été découvertes dans les produits Fortinet.
+      Certaines permettent une exécution de code arbitraire à distance (CVE-2026-24101, cve-2026-24102).</p>]]></description>
+    </item>
+    <item>
+      <title>Vulnérabilité dans Siemens SIMATIC S7-1500</title>
+      <link>https://cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1305/</link>
+      <guid isPermaLink="true">https://cert.cyber.gouv.fr/avis/CERTFR-2026-AVI-1305/</guid>
+      <pubDate>Tue, 13 Oct 2026 09:30:00 +0200</pubDate>
+      <description><![CDATA[Une vulnérabilité a été découverte dans Siemens SIMATIC S7-1500. Elle permet à un attaquant de provoquer un déni de service à distance (CVE-2026-31337).]]></description>
+    </item>
+    <item>
+      <title>Exploitation d'une vulnérabilité dans Ivanti Connect Secure</title>
+      <link>https://cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-014/</link>
+      <guid isPermaLink="true">https://cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-014/</guid>
+      <pubDate>Wed, 14 Oct 2026 18:00:00 +0200</pubDate>
+      <description><![CDATA[L'éditeur indique que la vulnérabilité CVE-2026-20001 est activement exploitée.]]></description>
+    </item>
+    <item>
+      <title>Bulletin d'actualité sans identifiant</title>
+      <link>https://cert.cyber.gouv.fr/page-quelconque/</link>
+      <pubDate>Wed, 14 Oct 2026 19:00:00 +0200</pubDate>
+      <description>Élément sans référence CERTFR : doit être ignoré.</description>
+    </item>
+  </channel>
+</rss>

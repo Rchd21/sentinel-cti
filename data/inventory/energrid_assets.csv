@@ -1,0 +1,26 @@
+asset_id,vendor,product,version,category,environment,exposure,criticality,owner
+A001,Fortinet,FortiGate,7.2.8,firewall,IT,internet,5,Réseau
+A002,Fortinet,FortiClient EMS,7.2.4,vpn,IT,interne,4,Réseau
+A003,Microsoft,Exchange Server,2019 CU14,messagerie,IT,internet,5,Infra
+A004,Microsoft,Windows Server,2022,os,IT,interne,4,Infra
+A005,Microsoft,Windows,11 23H2,os,IT,interne,3,Poste de travail
+A006,Microsoft,SharePoint Server,2019,collaboration,IT,interne,3,Infra
+A007,Citrix,NetScaler ADC,14.1,reverse-proxy,IT,internet,5,Réseau
+A008,VMware,vCenter Server,8.0,virtualisation,IT,interne,5,Infra
+A009,VMware,ESXi,8.0,virtualisation,IT,interne,5,Infra
+A010,Atlassian,Confluence Data Center,8.5,collaboration,IT,interne,3,DSI
+A011,Apache,Tomcat,9.0,serveur-web,IT,internet,3,Applications
+A012,Oracle,Database,19c,base-de-donnees,IT,interne,4,Applications
+A013,SAP,S/4HANA,2022,erp,IT,interne,4,Applications
+A014,Ivanti,Connect Secure,22.7,vpn,IT,internet,5,Réseau
+A015,Cisco,IOS XE,17.9,routeur,IT,interne,4,Réseau
+A016,Veeam,Backup & Replication,12.1,sauvegarde,IT,interne,5,Infra
+A017,GitLab,GitLab CE,17.2,devops,IT,interne,3,DSI
+A018,Siemens,SIMATIC S7-1500,3.1,automate,OT,isole,5,Exploitation
+A019,Siemens,SCALANCE,8.1,switch-industriel,OT,isole,4,Exploitation
+A020,Schneider Electric,EcoStruxure,2023,supervision,OT,interne,5,Exploitation
+A021,Schneider Electric,Modicon M580,4.2,automate,OT,isole,5,Exploitation
+A022,ABB,RTU560,13.4,rtu,OT,isole,5,Exploitation
+A023,Moxa,NPort,5.0,passerelle-serie,OT,interne,4,Exploitation
+A024,Hitachi Energy,MicroSCADA X,10.4,supervision,OT,interne,5,Exploitation
+A025,Wonderware,AVEVA InTouch,2023,ihm,OT,interne,4,Exploitation
