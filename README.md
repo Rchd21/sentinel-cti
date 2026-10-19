@@ -12,7 +12,7 @@ assistant analyste (RAG) sur LLM local.
 | Phase | Contenu | Statut |
 | --- | --- | --- |
 | 0 | Cadrage, personas, KPI | ✅ |
-| 1 | Ingestion : CERT-FR | ✅ |
+| 1 | Ingestion : CERT-FR (flux RSS + détail des avis) | ✅ |
 | 1 | Ingestion : NVD, CISA KEV, EPSS, ThreatFox | ⏳ |
 | 2 | Extraction d'IoC | — |
 | 3 | Enrichissement, ATT&CK | — |
@@ -29,6 +29,8 @@ pip install -e ".[dev]"
 cp .env.example .env
 
 sentinel ingest certfr     # collecte les flux CERT-FR (avis, alertes, CTI, IoC, SCADA)
+sentinel enrich certfr     # détail de chaque avis : CVE, systèmes affectés, risques
+sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis
 sentinel latest -n 10      # derniers avis enregistrés
 pytest                     # tests hors ligne
 pytest -m live             # test réel contre le CERT-FR (Internet requis)

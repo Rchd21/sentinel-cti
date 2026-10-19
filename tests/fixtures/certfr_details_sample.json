@@ -1,0 +1,26 @@
+{
+  "reference": "CERTFR-2026-AVI-1301",
+  "title": "Multiples vulnérabilités dans les produits Fortinet",
+  "summary": "De multiples vulnérabilités ont été découvertes dans les produits Fortinet. Certaines permettent une exécution de code arbitraire à distance.",
+  "risks": [
+    {"description": "Exécution de code arbitraire à distance"},
+    {"description": "Contournement de la politique de sécurité"},
+    {"description": ""}
+  ],
+  "affected_systems": [
+    {
+      "description": "FortiOS versions 7.2.x antérieures à 7.2.11",
+      "product": {"name": "FortiOS", "vendor": {"name": "Fortinet", "scada": false}}
+    },
+    {
+      "description": "FortiClientEMS versions 7.2.x antérieures à 7.2.6",
+      "product": {"name": "FortiClientEMS", "vendor": {"name": "Fortinet", "scada": false}}
+    },
+    "élément mal formé à ignorer"
+  ],
+  "cves": [
+    {"name": "CVE-2026-24101", "url": "https://www.cve.org/CVERecord?id=CVE-2026-24101"},
+    {"name": "cve-2026-24102", "url": "https://www.cve.org/CVERecord?id=CVE-2026-24102"}
+  ],
+  "content": "Se référer au bulletin de l'éditeur, qui mentionne aussi CVE-2026-24199."
+}

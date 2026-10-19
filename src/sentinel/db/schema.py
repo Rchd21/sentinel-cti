@@ -5,7 +5,17 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-from sqlalchemy import JSON, DateTime, Integer, String, Text, UniqueConstraint, create_engine
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+    inspect,
+    text,
+)
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -32,6 +42,10 @@ class AdvisoryRow(Base):
     content_hash: Mapped[str] = mapped_column(String(64))
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    # Détail de l'avis (étape d'enrichissement)
+    affected_systems: Mapped[list[dict]] = mapped_column(JSON, default=list)
+    risks: Mapped[list[str]] = mapped_column(JSON, default=list)
+    details_fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 def get_engine(url: str | None = None) -> Engine:
@@ -39,5 +53,21 @@ def get_engine(url: str | None = None) -> Engine:
     if url.startswith("sqlite:///") and not url.endswith(":memory:"):
         Path(url.removeprefix("sqlite:///")).parent.mkdir(parents=True, exist_ok=True)
     engine = create_engine(url, future=True)
-    Base.metadata.create_all(engine)  # migrations Alembic plus tard (Phase 7)
+    Base.metadata.create_all(engine)  # crée les tables qui n'existent pas encore
+    add_missing_columns(engine)  # migrations Alembic plus tard (Phase 7)
     return engine
+
+
+def add_missing_columns(engine: Engine) -> None:
+    """Ajoute aux tables existantes les colonnes déclarées dans le code mais absentes en base."""
+    inspector = inspect(engine)
+    for table in Base.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        existing = {col["name"] for col in inspector.get_columns(table.name)}
+        for column in table.columns:
+            if column.name in existing:
+                continue
+            col_type = column.type.compile(dialect=engine.dialect)
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table.name} ADD COLUMN {column.name} {col_type}"))
