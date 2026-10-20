@@ -20,14 +20,17 @@ from sentinel.models import Advisory
 log = logging.getLogger(__name__)
 
 
-def build_session() -> requests.Session:
+RETRY_STATUSES = (429, 500, 502, 503, 504)
+
+
+def build_session(extra_retry_statuses: tuple[int, ...] = ()) -> requests.Session:
     """Session HTTP avec User-Agent identifiable et reprise automatique sur erreur."""
     session = requests.Session()
     session.headers["User-Agent"] = settings.user_agent
     retry = Retry(
         total=3,
         backoff_factor=2,  # 2 s, 4 s, 8 s
-        status_forcelist=(429, 500, 502, 503, 504),
+        status_forcelist=RETRY_STATUSES + extra_retry_statuses,
         allowed_methods=("GET",),
     )
     session.mount("https://", HTTPAdapter(max_retries=retry))

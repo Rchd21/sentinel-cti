@@ -2,7 +2,9 @@
 
 sentinel ingest certfr     # collecte et enregistre les avis CERT-FR
 sentinel enrich certfr     # récupère CVE, systèmes affectés et risques de chaque avis
+sentinel enrich nvd        # récupère la gravité (CVSS) des CVE citées dans les avis
 sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis
+sentinel cve CVE-2026-24101          # fiche d'une CVE
 sentinel latest -n 10      # affiche les derniers avis en base
 """
 
@@ -13,8 +15,10 @@ import logging
 import sys
 
 from sentinel.db import AdvisoryRepository, get_engine
+from sentinel.db.cve_repository import CveRepository, severity_counts
 from sentinel.ingestion import CONNECTORS
 from sentinel.ingestion.certfr_details import CertFrDetailsFetcher
+from sentinel.ingestion.nvd import NvdClient
 
 
 def cmd_ingest(args: argparse.Namespace) -> int:
@@ -28,9 +32,29 @@ def cmd_ingest(args: argparse.Namespace) -> int:
 
 
 def cmd_enrich(args: argparse.Namespace) -> int:
-    repo = AdvisoryRepository(get_engine())
-    stats = CertFrDetailsFetcher().enrich_pending(repo, limit=args.limit)
-    print(f"[certfr] détail des avis -> {stats}")
+    engine = get_engine()
+    if args.source == "certfr":
+        stats = CertFrDetailsFetcher().enrich_pending(AdvisoryRepository(engine), args.limit)
+        print(f"[certfr] détail des avis -> {stats}")
+    elif args.source == "nvd":
+        stats = NvdClient().enrich_pending(CveRepository(engine), args.limit)
+        print(f"[nvd] gravité des CVE -> {stats}")
+    return 0
+
+
+def cmd_cve(args: argparse.Namespace) -> int:
+    row = CveRepository(get_engine()).get(args.cve_id.upper())
+    if row is None:
+        print(f"{args.cve_id} pas encore en base (lancer : sentinel enrich nvd)")
+        return 1
+    score = f"{row.cvss_score} {row.severity} (CVSS {row.cvss_version})" if row.cvss_score else "-"
+    print(f"{row.cve_id}  [{row.nvd_status}]")
+    print(f"Gravité  : {score}")
+    print(f"Vecteur  : {row.vector or '-'}")
+    print(f"Faiblesse: {', '.join(row.cwes or []) or '-'}")
+    if row.cisa_kev_added:
+        print(f"EXPLOITÉE: ajoutée au catalogue CISA KEV le {row.cisa_kev_added}")
+    print(f"\n{row.description}")
     return 0
 
 
@@ -47,6 +71,14 @@ def cmd_show(args: argparse.Namespace) -> int:
     cves = row.cves or []
     shown = ", ".join(cves[:10]) + (f" ... (+{len(cves) - 10})" if len(cves) > 10 else "")
     print(f"CVE ({len(cves)}) : {shown or 'aucune'}")
+
+    scored = CveRepository(get_engine()).for_ids(cves)
+    if scored:
+        counts = ", ".join(f"{n} {level}" for level, n in severity_counts(scored).items())
+        print(f"\nGravité ({len(scored)}/{len(cves)} CVE notées) : {counts or '-'}")
+        for cve in scored[:5]:
+            kev = "  EXPLOITÉE (KEV)" if cve.cisa_kev_added else ""
+            print(f"  {cve.cve_id:<18} {cve.cvss_score or '-':>4} {cve.severity or ''}{kev}")
     return 0
 
 
@@ -68,10 +100,14 @@ def main(argv: list[str] | None = None) -> int:
     p_ingest.add_argument("source", choices=[*CONNECTORS, "all"])
     p_ingest.set_defaults(func=cmd_ingest)
 
-    p_enrich = sub.add_parser("enrich", help="récupérer le détail des avis (CVE, systèmes)")
-    p_enrich.add_argument("source", choices=["certfr"])
+    p_enrich = sub.add_parser("enrich", help="enrichir : détail des avis ou gravité des CVE")
+    p_enrich.add_argument("source", choices=["certfr", "nvd"])
     p_enrich.add_argument("--limit", type=int, default=50)
     p_enrich.set_defaults(func=cmd_enrich)
+
+    p_cve = sub.add_parser("cve", help="afficher la fiche d'une CVE")
+    p_cve.add_argument("cve_id")
+    p_cve.set_defaults(func=cmd_cve)
 
     p_show = sub.add_parser("show", help="afficher la fiche complète d'un avis")
     p_show.add_argument("ref_id")

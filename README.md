@@ -13,7 +13,8 @@ assistant analyste (RAG) sur LLM local.
 | --- | --- | --- |
 | 0 | Cadrage, personas, KPI | ✅ |
 | 1 | Ingestion : CERT-FR (flux RSS + détail des avis) | ✅ |
-| 1 | Ingestion : NVD, CISA KEV, EPSS, ThreatFox | ⏳ |
+| 1 | Ingestion : NVD (gravité CVSS des CVE) | ✅ |
+| 1 | Ingestion : CISA KEV, EPSS, ThreatFox | ⏳ |
 | 2 | Extraction d'IoC | — |
 | 3 | Enrichissement, ATT&CK | — |
 | 4 | Scoring de priorité | — |
@@ -30,7 +31,9 @@ cp .env.example .env
 
 sentinel ingest certfr     # collecte les flux CERT-FR (avis, alertes, CTI, IoC, SCADA)
 sentinel enrich certfr     # détail de chaque avis : CVE, systèmes affectés, risques
-sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis
+sentinel enrich nvd --limit 100      # gravité CVSS des CVE (clé NVD_API_KEY conseillée)
+sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis, avec la gravité de ses CVE
+sentinel cve CVE-2021-44228          # fiche d'une CVE
 sentinel latest -n 10      # derniers avis enregistrés
 pytest                     # tests hors ligne
 pytest -m live             # test réel contre le CERT-FR (Internet requis)
@@ -61,7 +64,7 @@ Choix techniques documentés dans [`docs/decisions/`](docs/decisions/).
 | Source | Accès | Statut |
 | --- | --- | --- |
 | CERT-FR | Flux RSS publics ([annuaire](https://cert.cyber.gouv.fr/flux-rss/)) | ✅ |
-| NVD | API REST 2.0 | ⏳ |
+| NVD | API REST 2.0 | ✅ |
 | CISA KEV | JSON | ⏳ |
 | FIRST EPSS | API REST | ⏳ |
 | abuse.ch ThreatFox | API | ⏳ |

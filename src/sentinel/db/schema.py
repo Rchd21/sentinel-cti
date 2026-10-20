@@ -8,6 +8,7 @@ from pathlib import Path
 from sqlalchemy import (
     JSON,
     DateTime,
+    Float,
     Integer,
     String,
     Text,
@@ -46,6 +47,24 @@ class AdvisoryRow(Base):
     affected_systems: Mapped[list[dict]] = mapped_column(JSON, default=list)
     risks: Mapped[list[str]] = mapped_column(JSON, default=list)
     details_fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CveRow(Base):
+    """Une faille (CVE) et sa gravité selon la NVD. Une ligne par CVE, partagée par les avis."""
+
+    __tablename__ = "cves"
+
+    cve_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    description: Mapped[str] = mapped_column(Text, default="")
+    cvss_version: Mapped[str | None] = mapped_column(String(8))
+    cvss_score: Mapped[float | None] = mapped_column(Float, index=True)
+    severity: Mapped[str | None] = mapped_column(String(16), index=True)
+    vector: Mapped[str | None] = mapped_column(Text)
+    cwes: Mapped[list[str]] = mapped_column(JSON, default=list)
+    nvd_status: Mapped[str] = mapped_column(String(32), default="")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cisa_kev_added: Mapped[str | None] = mapped_column(String(10))
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 def get_engine(url: str | None = None) -> Engine:
