@@ -5,6 +5,8 @@ sentinel enrich certfr     # récupère CVE, systèmes affectés et risques de c
 sentinel enrich nvd        # récupère la gravité (CVSS) des CVE citées dans les avis
 sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis
 sentinel cve CVE-2026-24101          # fiche d'une CVE
+sentinel match             # avis qui concernent l'inventaire de l'entreprise
+sentinel match CERTFR-2026-AVI-1301  # correspondances d'un avis précis
 sentinel latest -n 10      # affiche les derniers avis en base
 """
 
@@ -19,6 +21,14 @@ from sentinel.db.cve_repository import CveRepository, severity_counts
 from sentinel.ingestion import CONNECTORS
 from sentinel.ingestion.certfr_details import CertFrDetailsFetcher
 from sentinel.ingestion.nvd import NvdClient
+from sentinel.inventory import (
+    DEFAULT_INVENTORY,
+    UP_TO_DATE,
+    VULNERABLE,
+    Match,
+    load_inventory,
+    match_advisory,
+)
 
 
 def cmd_ingest(args: argparse.Namespace) -> int:
@@ -82,6 +92,53 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def print_matches(row, matches: list[Match]) -> None:
+    """Affiche un avis et les équipements de l'inventaire qu'il concerne."""
+    date = row.published_at.strftime("%Y-%m-%d") if row.published_at else "????-??-??"
+    print(f"\n{date}  {row.ref_id}  {row.title[:70]}")
+    for m in matches:
+        a = m.asset
+        print(
+            f"  [{m.status:<10}] {a.asset_id} {a.vendor} {a.product} {a.version}"
+            f"  ({a.exposure}, criticité {a.criticality}/5, {a.owner})"
+        )
+        print(f"               -> {m.reason}")
+
+
+def cmd_match(args: argparse.Namespace) -> int:
+    assets = load_inventory(args.inventory)
+    repo = AdvisoryRepository(get_engine())
+
+    if args.ref_id:
+        row = repo.get("certfr", args.ref_id)
+        if row is None:
+            print(f"{args.ref_id} introuvable en base")
+            return 1
+        matches = match_advisory(row.affected_systems, assets)
+        if matches:
+            print_matches(row, matches)
+        else:
+            print(f"{row.ref_id} : aucun équipement de l'inventaire concerné")
+        return 0
+
+    concerned = vulnerable = 0
+    for row in repo.with_affected_systems():
+        matches = [
+            m for m in match_advisory(row.affected_systems, assets) if m.status != UP_TO_DATE
+        ]
+        if not matches:
+            continue
+        concerned += 1
+        vulnerable += sum(m.status == VULNERABLE for m in matches)
+        print_matches(row, matches)
+
+    print(
+        f"\nBilan : {concerned} avis concernent l'inventaire "
+        f"({len(assets)} équipements), {vulnerable} correspondances VULNÉRABLES."
+    )
+    return 0
+
+
 def cmd_latest(args: argparse.Namespace) -> int:
     repo = AdvisoryRepository(get_engine())
     for row in repo.latest(args.n):
@@ -113,6 +170,11 @@ def main(argv: list[str] | None = None) -> int:
     p_show.add_argument("ref_id")
     p_show.add_argument("--source", default="certfr")
     p_show.set_defaults(func=cmd_show)
+
+    p_match = sub.add_parser("match", help="avis qui concernent l'inventaire de l'entreprise")
+    p_match.add_argument("ref_id", nargs="?", help="un avis précis (facultatif)")
+    p_match.add_argument("--inventory", default=str(DEFAULT_INVENTORY))
+    p_match.set_defaults(func=cmd_match)
 
     p_latest = sub.add_parser("latest", help="derniers avis en base")
     p_latest.add_argument("-n", type=int, default=10)

@@ -113,6 +113,12 @@ class AdvisoryRepository:
                 )
             )
 
+    def with_affected_systems(self) -> list[AdvisoryRow]:
+        """Avis dont on connaît les systèmes affectés, du plus récent au plus ancien."""
+        with Session(self.engine) as session:
+            stmt = select(AdvisoryRow).order_by(AdvisoryRow.published_at.desc().nullslast())
+            return [row for row in session.scalars(stmt) if row.affected_systems]
+
     def latest(self, limit: int = 10) -> list[AdvisoryRow]:
         with Session(self.engine) as session:
             stmt = (

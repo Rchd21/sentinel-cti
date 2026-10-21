@@ -17,6 +17,7 @@ assistant analyste (RAG) sur LLM local.
 | 1 | Ingestion : CISA KEV, EPSS, ThreatFox | ⏳ |
 | 2 | Extraction d'IoC | — |
 | 3 | Enrichissement, ATT&CK | — |
+| 4 | Correspondance avec l'inventaire (`sentinel match`) | ✅ |
 | 4 | Scoring de priorité | — |
 | 5 | Assistant RAG | — |
 | 6 | Dashboard, rapport hebdo | — |
@@ -34,6 +35,7 @@ sentinel enrich certfr     # détail de chaque avis : CVE, systèmes affectés, 
 sentinel enrich nvd --limit 100      # gravité CVSS des CVE (clé NVD_API_KEY conseillée)
 sentinel show CERTFR-2026-AVI-1342   # fiche complète d'un avis, avec la gravité de ses CVE
 sentinel cve CVE-2021-44228          # fiche d'une CVE
+sentinel match                       # avis qui concernent l'inventaire EnerGrid
 sentinel latest -n 10      # derniers avis enregistrés
 pytest                     # tests hors ligne
 pytest -m live             # test réel contre le CERT-FR (Internet requis)
